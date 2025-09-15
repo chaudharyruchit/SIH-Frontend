@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AlumGlobe Design System - Professional Alumni Platform */
+
+@layer base {
+  :root {
+    /* Core Brand Colors */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 20%;
+
+    /* AlumGlobe Brand Colors */
+    --primary: 215 75% 22%;           /* Blue #0A2A66 */
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 215 60% 35%;
+    --primary-dark: 215 85% 15%;
+
+    --secondary: 49 78% 46%;          /* Gold #D4A017 */
+    --secondary-foreground: 215 75% 22%;
+    --secondary-light: 49 65% 55%;
+    --secondary-dark: 49 90% 35%;
+
+    /* UI Colors */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 20%;
+
+    --muted: 215 15% 96%;
+    --muted-foreground: 215 10% 45%;
+
+    --accent: 215 20% 95%;
+    --accent-foreground: 215 25% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 75% 22%;
+
+    --border: 215 15% 88%;
+    --input: 215 15% 88%;
+    --ring: 215 75% 22%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-light)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-dark)) 50%, hsl(var(--secondary)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(var(--primary) / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(var(--primary) / 0.1), 0 2px 4px -1px hsl(var(--primary) / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--primary) / 0.1), 0 4px 6px -2px hsl(var(--primary) / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(var(--primary) / 0.1), 0 10px 10px -5px hsl(var(--primary) / 0.04);
+    --shadow-glow: 0 0 20px hsl(var(--secondary) / 0.3);
+
+    /* Animations */
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 215 25% 8%;
+    --foreground: 215 5% 90%;
+
+    --card: 215 25% 10%;
+    --card-foreground: 215 5% 90%;
+
+    --popover: 215 25% 10%;
+    --popover-foreground: 215 5% 90%;
+
+    --primary: 215 75% 22%;
+    --primary-foreground: 0 0% 98%;
+    --primary-light: 215 60% 35%;
+    --primary-dark: 215 85% 15%;
+
+    --secondary: 49 78% 46%;
+    --secondary-foreground: 215 25% 8%;
+    --secondary-light: 49 65% 55%;
+    --secondary-dark: 49 90% 35%;
+
+    --muted: 215 20% 15%;
+    --muted-foreground: 215 10% 60%;
+
+    --accent: 215 20% 18%;
+    --accent-foreground: 215 5% 90%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 215 25% 8%;
+
+    --border: 215 20% 20%;
+    --input: 215 20% 20%;
+    --ring: 215 75% 22%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary-dark)), hsl(var(--primary)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary-dark)), hsl(var(--secondary)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-dark)) 0%, hsl(var(--primary)) 50%, hsl(var(--secondary-dark)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Custom button variants */
+  .btn-hero {
+    @apply bg-gradient-to-r from-primary to-secondary text-white font-semibold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
+  }
+
+  .btn-outline-hero {
+    @apply border-2 border-primary text-primary bg-transparent font-semibold px-8 py-4 rounded-xl hover:bg-primary hover:text-white transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  /* Card styles */
+  .card-elevated {
+    @apply bg-card border border-border rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-card to-muted border border-border rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  /* Profile card */
+  .profile-card {
+    @apply card-elevated p-6 hover:scale-105 hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Glassmorphism effect */
+  .glass {
+    @apply bg-white/10 backdrop-blur-sm border border-white/20;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px hsl(var(--secondary) / 0.3);
+  }
+  to {
+    box-shadow: 0 0 30px hsl(var(--secondary) / 0.6);
+  }
+}
