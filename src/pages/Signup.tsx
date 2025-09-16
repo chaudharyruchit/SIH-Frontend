@@ -1,77 +1,81 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, ChevronDown, ArrowLeft } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import OTPVerification from '@/components/OTPVerification';
 import alumglobeLogo from '@/assets/alumglobe-logo.png';
+import { registerUser } from '@/api/api'; // your API function
 
 const Signup = () => {
+  const [role, setRole] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
-    role: '',
+    college: '',
+    rollNo: '',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showOTP, setShowOTP] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const colleges = ['G.L BAJAJ' , 'KIET', 'ABESEC']; // Replace with your backend list
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSelectChange = (value: string, field: string) => {
+    setFormData({ ...formData, [field]: value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate sending OTP
-    setTimeout(() => {
+    try {
+      let payload;
+      if (role === 'admin') {
+        payload = {
+          role,
+          email: formData.email,
+          password: formData.password,
+          college: formData.college,
+        };
+      } else {
+        payload = {
+          role,
+          name: formData.fullName,
+          email: formData.email,
+          college: formData.college,
+          rollNo: formData.rollNo,
+          password: formData.password,
+        };
+      }
+
+      await registerUser(payload);
+
       toast({
-        title: "OTP Sent!",
-        description: "Please check your email for the verification code.",
+        title: 'Signup successful!',
+        description: 'Please login to continue.',
       });
+
+      navigate('/login'); // redirect to login after signup
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        title: 'Signup failed',
+        description: err.response?.data?.detail || 'Server error. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsLoading(false);
-      setShowOTP(true);
-    }, 1500);
+    }
   };
-
-  const handleOTPVerified = () => {
-    toast({
-      title: "Account created successfully!",
-      description: "Welcome to AlumGlobe. You can now login with your credentials.",
-    });
-    navigate('/login');
-  };
-
-  const handleBackToSignup = () => {
-    setShowOTP(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleRoleChange = (value: string) => {
-    setFormData({
-      ...formData,
-      role: value,
-    });
-  };
-
-  if (showOTP) {
-    return (
-      <OTPVerification
-        email={formData.email}
-        onVerified={handleOTPVerified}
-        onBack={handleBackToSignup}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
@@ -89,7 +93,7 @@ const Signup = () => {
         <Card className="card-elevated animate-fade-in">
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">
-              <img src={alumglobeLogo} alt="AlumGlobe" className="h-12 w-12" />
+              <img src={alumglobeLogo} alt="AlumGlobe" className="h-12 w-12 rounded-full" />
             </div>
             <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
             <p className="text-muted-foreground">
@@ -98,23 +102,40 @@ const Signup = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Full Name */}
+              {/* Role Selection */}
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    className="pl-10"
-                    required
-                  />
-                </div>
+                <Label htmlFor="role">Role</Label>
+                <Select value={role} onValueChange={setRole} required>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="student">Student</SelectItem>
+                    <SelectItem value="alumni">Alumni</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+
+              {/* Name (for student/alumni) */}
+              {role && role !== 'admin' && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      className="pl-10"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Email */}
               <div className="space-y-2">
@@ -134,6 +155,43 @@ const Signup = () => {
                 </div>
               </div>
 
+              {/* College */}
+              <div className="space-y-2">
+                <Label htmlFor="college">College</Label>
+                <Select
+                  value={formData.college}
+                  onValueChange={(val) => handleSelectChange(val, 'college')}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select your college" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {colleges.map((college) => (
+                      <SelectItem key={college} value={college}>
+                        {college}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Roll Number for student/alumni */}
+              {role && role !== 'admin' && (
+                <div className="space-y-2">
+                  <Label htmlFor="rollNo">College Roll No.</Label>
+                  <Input
+                    id="rollNo"
+                    name="rollNo"
+                    type="text"
+                    placeholder="Enter your college roll number"
+                    value={formData.rollNo}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              )}
+
               {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
@@ -152,27 +210,8 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Role */}
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select value={formData.role} onValueChange={handleRoleChange} required>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="alumni">Alumni</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full btn-hero" 
-                disabled={isLoading}
-              >
+              {/* Submit */}
+              <Button type="submit" className="w-full btn-hero" disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -186,36 +225,6 @@ const Signup = () => {
                 )}
               </Button>
             </form>
-
-            {/* Social Signup */}
-            <div className="space-y-4">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="w-full" disabled>
-                  <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                  Google
-                </Button>
-                <Button variant="outline" className="w-full" disabled>
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                  LinkedIn
-                </Button>
-              </div>
-            </div>
 
             {/* Login Link */}
             <div className="text-center">

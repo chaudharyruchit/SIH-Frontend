@@ -1,59 +1,75 @@
-import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin } from 'lucide-react';
-import alumglobeLogo from '@/assets/alumglobe-logo.png';
+import { Link } from "react-router-dom";
+import { Mail, Phone, MapPin } from "lucide-react";
+import alumglobeLogo from "@/assets/alumglobe-logo.png";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className="bg-gray-50 text-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
+          <div className="col-span-1 md:col-span-2 bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center space-x-2 mb-4">
               <img src={alumglobeLogo} alt="AlumGlobe" className="h-8 w-8" />
-              <span className="text-xl font-bold">AlumGlobe</span>
+              <span className="text-xl font-bold text-primary">AlumGlobe</span>
             </div>
-            <p className="text-primary-foreground/80 mb-4 max-w-md">
-              AI-powered Alumni Networking & Engagement platform connecting graduates worldwide 
-              for mentorship, career opportunities, and meaningful relationships.
+            <p className="text-gray-600 mb-4 max-w-md">
+              AI-powered Alumni Networking & Engagement platform connecting
+              graduates worldwide for mentorship, career opportunities, and
+              meaningful relationships.
             </p>
             <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-primary-foreground/80">
-                <Mail className="w-4 h-4" />
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Mail className="w-4 h-4 text-primary" />
                 <span>contact@alumglobe.com</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-primary-foreground/80">
-                <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Phone className="w-4 h-4 text-primary" />
+                <span>+91-9318374443</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-primary-foreground/80">
-                <MapPin className="w-4 h-4" />
-                <span>San Francisco, CA</span>
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span>Greater Noida , Uttar Pradesh</span>
               </div>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h3 className="font-semibold text-primary mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/"
+                  onClick={() =>
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Home
                 </Link>
               </li>
               <li>
-                <a href="#features" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <a
+                  href="#features"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Features
                 </a>
               </li>
               <li>
-                <Link to="/login" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/login"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Login
                 </Link>
               </li>
               <li>
-                <Link to="/signup" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/signup"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Sign Up
                 </Link>
               </li>
@@ -61,26 +77,38 @@ const Footer = () => {
           </div>
 
           {/* Legal */}
-          <div>
-            <h3 className="font-semibold mb-4">Legal</h3>
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h3 className="font-semibold text-primary mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Cookie Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-gray-600 hover:text-primary transition-colors"
+                >
                   Support
                 </a>
               </li>
@@ -89,9 +117,9 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
-          <p className="text-primary-foreground/60 text-sm">
-            © 2024 AlumGlobe. All rights reserved. Connecting alumni worldwide.
+        <div className="border-t border-gray-200 mt-8 pt-6 text-center">
+          <p className="text-gray-500 text-sm">
+            © 2025 AlumGlobe. All rights reserved. Connecting alumni worldwide.
           </p>
         </div>
       </div>
