@@ -8,10 +8,14 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="col-span-1 md:col-span-2 bg-white rounded-xl shadow-sm p-6">
+          <div className="col-span-1 md:col-span-2 p-6">
             <div className="flex items-center space-x-2 mb-4">
-              <img src={alumglobeLogo} alt="AlumGlobe" className="h-8 w-8" />
-              <span className="text-xl font-bold text-primary">AlumGlobe</span>
+              <img
+                src={alumglobeLogo}
+                alt="AlumGlobe"
+                className="h-12 w-12 rounded-full border-2 border-gray-300"
+              />
+              <span className="text-xl font-bold text-black">AlumGlobe</span>
             </div>
             <p className="text-gray-600 mb-4 max-w-md">
               AI-powered Alumni Networking & Engagement platform connecting
@@ -20,16 +24,16 @@ const Footer = () => {
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Mail className="w-4 h-4 text-primary" />
+                <Mail className="w-4 h-4 text-black" />
                 <span>contact@alumglobe.com</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Phone className="w-4 h-4 text-primary" />
+                <Phone className="w-4 h-4 text-black" />
                 <span>+91-9318374443</span>
               </div>
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <MapPin className="w-4 h-4 text-primary" />
-                <span>Greater Noida , Uttar Pradesh</span>
+                <MapPin className="w-4 h-4 text-black" />
+                <span>Greater Noida, Uttar Pradesh</span>
               </div>
             </div>
           </div>

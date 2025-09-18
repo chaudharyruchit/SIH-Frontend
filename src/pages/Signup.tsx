@@ -1,29 +1,50 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import alumglobeLogo from '@/assets/alumglobe-logo.png';
-import { registerUser } from '@/api/api'; // your API function
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { UserPlus, Mail, Lock, User, ArrowLeft, Phone, LinkIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import alumglobeLogo from "@/assets/alumglobe-logo.png";
 
 const Signup = () => {
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState("");
+  const [colleges, setColleges] = useState<{ name: string; code: string }[]>([]);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    college: '',
-    rollNo: '',
+    username: "",
+    email: "",
+    password: "",
+    phone: "",
+    college_code: "",
+    roll_number: "",
+    linkedin_url: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const colleges = ['G.L BAJAJ' , 'KIET', 'ABESEC']; // Replace with your backend list
+  // 🔹 Fetch colleges dynamically from backend instead of hardcoding
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/colleges/");
+        if (!res.ok) throw new Error("Failed to load colleges");
+        const data = await res.json();
+        setColleges(data);
+      } catch (err) {
+        console.error(err);
+        // fallback if API not ready
+        setColleges([
+          { name: "G.L Bajaj", code: "GLB" },
+          { name: "KIET", code: "KIET" },
+          { name: "ABESEC", code: "ABESEC" },
+        ]);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -38,39 +59,57 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      let payload;
-      if (role === 'admin') {
-        payload = {
-          role,
-          email: formData.email,
-          password: formData.password,
-          college: formData.college,
-        };
-      } else {
-        payload = {
-          role,
-          name: formData.fullName,
-          email: formData.email,
-          college: formData.college,
-          rollNo: formData.rollNo,
-          password: formData.password,
-        };
+      const payload: any = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role,
+        phone: formData.phone || "",
+        linkedin_url: formData.linkedin_url || "",
+        college_code: formData.college_code,
+      };
+
+      if (role === "student" || role === "alumni") {
+        if (!formData.roll_number.trim()) {
+          toast({
+            title: "Roll number required",
+            description: "Please enter your roll number",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+        payload.roll_number = formData.roll_number;
       }
 
-      await registerUser(payload);
-
-      toast({
-        title: 'Signup successful!',
-        description: 'Please login to continue.',
+      const response = await fetch("http://127.0.0.1:8000/api/auth/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
-      navigate('/login'); // redirect to login after signup
-    } catch (err: any) {
-      console.error(err);
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage =
+          data.errors
+            ? Object.values(data.errors).flat().join(", ")
+            : data.error || "Registration failed";
+        throw new Error(errorMessage);
+      }
+
       toast({
-        title: 'Signup failed',
-        description: err.response?.data?.detail || 'Server error. Please try again.',
-        variant: 'destructive',
+        title: "Account created",
+        description: "You can now log in with your credentials",
+      });
+
+      navigate("/login"); // 🔹 Always send to login after signup
+
+    } catch (err: any) {
+      toast({
+        title: "Registration failed",
+        description: err.message || "Server error",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -80,7 +119,6 @@ const Signup = () => {
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home */}
         <div className="mb-6">
           <Button asChild variant="ghost" className="text-white hover:bg-white/10">
             <Link to="/" className="flex items-center space-x-2">
@@ -97,12 +135,13 @@ const Signup = () => {
             </div>
             <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
             <p className="text-muted-foreground">
-              Join the AlumGlobe community and start connecting with fellow alumni
+              Join the AlumGlobe community and start connecting with peers
             </p>
           </CardHeader>
+
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Role Selection */}
+              {/* Role */}
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
                 <Select value={role} onValueChange={setRole} required>
@@ -112,55 +151,68 @@ const Signup = () => {
                   <SelectContent>
                     <SelectItem value="student">Student</SelectItem>
                     <SelectItem value="alumni">Alumni</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Name (for student/alumni) */}
-              {role && role !== 'admin' && (
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="fullName"
-                      name="fullName"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Email */}
+              {/* Username */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="username">Username</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
+                    id="username"
+                    name="username"
+                    value={formData.username}
                     onChange={handleInputChange}
+                    placeholder="Enter username"
                     className="pl-10"
                     required
                   />
                 </div>
               </div>
 
+              {/* Email */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter email"
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone (Optional)</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    placeholder="Enter phone number"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
               {/* College */}
               <div className="space-y-2">
-                <Label htmlFor="college">College</Label>
+                <Label htmlFor="college_code">College</Label>
                 <Select
-                  value={formData.college}
-                  onValueChange={(val) => handleSelectChange(val, 'college')}
+                  value={formData.college_code}
+                  onValueChange={(val) => handleSelectChange(val, "college_code")}
                   required
                 >
                   <SelectTrigger className="w-full">
@@ -168,29 +220,44 @@ const Signup = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {colleges.map((college) => (
-                      <SelectItem key={college} value={college}>
-                        {college}
+                      <SelectItem key={college.code} value={college.code}>
+                        {college.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Roll Number for student/alumni */}
-              {role && role !== 'admin' && (
+              {/* Roll Number (only for student/alumni) */}
+              {role && (
                 <div className="space-y-2">
-                  <Label htmlFor="rollNo">College Roll No.</Label>
+                  <Label htmlFor="roll_number">Roll Number</Label>
                   <Input
-                    id="rollNo"
-                    name="rollNo"
-                    type="text"
-                    placeholder="Enter your college roll number"
-                    value={formData.rollNo}
+                    id="roll_number"
+                    name="roll_number"
+                    value={formData.roll_number}
                     onChange={handleInputChange}
+                    placeholder="Enter roll number"
                     required
                   />
                 </div>
               )}
+
+              {/* LinkedIn */}
+              <div className="space-y-2">
+                <Label htmlFor="linkedin_url">LinkedIn (Optional)</Label>
+                <div className="relative">
+                  <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="linkedin_url"
+                    name="linkedin_url"
+                    value={formData.linkedin_url}
+                    onChange={handleInputChange}
+                    placeholder="https://linkedin.com/in/your-profile"
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
               {/* Password */}
               <div className="space-y-2">
@@ -201,10 +268,11 @@ const Signup = () => {
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="Create a password"
                     value={formData.password}
                     onChange={handleInputChange}
+                    placeholder="Create password"
                     className="pl-10"
+                    minLength={6}
                     required
                   />
                 </div>
@@ -226,10 +294,9 @@ const Signup = () => {
               </Button>
             </form>
 
-            {/* Login Link */}
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
+            <div className="text-center text-sm text-muted-foreground mt-4">
+              <p>
+                Already have an account?{" "}
                 <Link to="/login" className="text-primary hover:underline font-medium">
                   Login here
                 </Link>

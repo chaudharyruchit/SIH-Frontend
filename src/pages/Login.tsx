@@ -5,17 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import alumglobeLogo from '@/assets/alumglobe-logo.png';
-import { loginUser } from '@/api/api'; // import API call
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    role: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -24,68 +18,115 @@ const Login = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRoleChange = (value: string) => {
-    setFormData({ ...formData, role: value });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const data = await loginUser({
-        username: formData.email,
-        password: formData.password,
-        role: formData.role,
+      const response = await fetch('http://127.0.0.1:8000/api/auth/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
 
-      // Check verification for student/alumni
-      if (!data.verified && formData.role !== 'admin') {
-        toast({
-          title: "Account Pending Approval",
-          description: "Your account has not been approved by the admin yet. Please try again later.",
-          variant: "destructive",
-        });
-        return;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || 'Login failed');
       }
 
-      // Store token & profile
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('profile', JSON.stringify(data.profile));
+      // Store tokens
+      if (data.tokens) {
+        localStorage.setItem('access_token', data.tokens.access);
+        localStorage.setItem('refresh_token', data.tokens.refresh);
+      }
 
+      // Store user info (both as JSON and individual items for compatibility)
+      const user = data.user || {};
+      localStorage.setItem('user_data', JSON.stringify(user));
+      
+      // Store individual user details for easy access
+      localStorage.setItem('user_id', user.id || '');
+      localStorage.setItem('user_name', user.username || user.first_name || user.name || 'User');
+      localStorage.setItem('user_email', user.email || '');
+      localStorage.setItem('user_role', user.role || '');
+      
+      // Store additional name variations based on role
+      if (user.role === 'student') {
+        localStorage.setItem('student_name', user.username || user.first_name || user.name || 'Student');
+      } else if (user.role === 'alumni') {
+        localStorage.setItem('alumni_name', user.username || user.first_name || user.name || 'Alumni');
+      }
+
+      // Load user's saved profile data from backend/server
+      await loadUserProfileData(user.id);
+
+      // Success toast with actual name
+      const displayName = user.username || user.first_name || user.name || 'User';
       toast({
-        title: "Login successful!",
-        description: `Welcome back, ${data.profile.name || 'User'}!`,
+        title: 'Login Successful',
+        description: `Welcome back, ${displayName}!`,
       });
 
-      // Redirect based on role
-      switch (formData.role) {
-        case 'student':
-        case 'alumni':
-          navigate('/profile-dashboard');
-          break;
+      // Redirect based on user role
+      const userRole = user.role;
+      switch (userRole) {
         case 'admin':
           navigate('/admin-dashboard');
           break;
+        case 'student':
+          navigate('/student-dashboard');
+          break;
+        case 'alumni':
+          navigate('/alumni-dashboard');
+          break;
         default:
-          navigate('/');
+          navigate('/dashboard');
       }
+
     } catch (err: any) {
-      console.error(err);
+      console.error('Login error:', err);
       toast({
-        title: "Login failed",
-        description: err.response?.data?.detail || "Invalid credentials or server error.",
-        variant: "destructive",
+        title: 'Login Failed',
+        description: err.message || 'Server error. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Function to load user profile data after login
+  const loadUserProfileData = async (userId: string) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/profile/${userId}/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const profileData = await response.json();
+        
+        // Store profile data in localStorage for this session
+        localStorage.setItem('user_phone', profileData.phone || '');
+        localStorage.setItem('user_location', profileData.location || '');
+        localStorage.setItem('user_bio', profileData.bio || '');
+        localStorage.setItem('user_university', profileData.university || '');
+        localStorage.setItem('user_major', profileData.major || '');
+        localStorage.setItem('user_graduation_year', profileData.graduation_year || '');
+        localStorage.setItem('profile_photo', profileData.profile_photo || '');
+      }
+    } catch (error) {
+      console.log('Profile data not found, will use defaults');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back to Home */}
         <div className="mb-6">
           <Button asChild variant="ghost" className="text-white hover:bg-white/10">
             <Link to="/" className="flex items-center space-x-2">
@@ -106,22 +147,6 @@ const Login = () => {
 
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Role */}
-              <div className="space-y-2">
-                <Label htmlFor="role">Login As</Label>
-                <Select value={formData.role} onValueChange={handleRoleChange} required>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="alumni">Alumni</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <div className="relative">
@@ -139,7 +164,6 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -157,7 +181,6 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Submit */}
               <Button type="submit" className="w-full btn-hero" disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -173,7 +196,6 @@ const Login = () => {
               </Button>
             </form>
 
-            {/* Signup Link */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}

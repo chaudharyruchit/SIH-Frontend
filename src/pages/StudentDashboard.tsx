@@ -1,352 +1,374 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  Search, 
-  Filter, 
-  Edit, 
-  Calendar, 
-  DollarSign, 
-  Users, 
-  ArrowLeft,
-  MapPin,
-  Building,
-  GraduationCap,
-  MessageCircle,
-  Heart,
-  Star
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import ProfileCard from '@/components/ProfileCard';
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Camera, Upload, User, Settings, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const StudentDashboard = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterBatch, setFilterBatch] = useState('');
-  const [filterCompany, setFilterCompany] = useState('');
-  const [filterLocation, setFilterLocation] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Mock student data
-  const studentProfile = {
-    name: 'Alex Johnson',
-    batch: '2024',
-    course: 'Computer Science',
-    university: 'Stanford University',
-    location: 'San Francisco, CA',
-    interests: ['Software Engineering', 'AI/ML', 'Startups'],
-    avatar: '',
+  // Try multiple possible keys for the user name
+  const studentName = 
+    localStorage.getItem("user_name") || 
+    localStorage.getItem("student_name") || 
+    localStorage.getItem("name") ||
+    "Student";
+
+  // Load profile photo on component mount
+  useEffect(() => {
+    const savedPhoto = localStorage.getItem("profile_photo");
+    if (savedPhoto) {
+      setProfilePhoto(savedPhoto);
+    }
+  }, []);
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    // Convert to base64 and store
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64String = e.target?.result as string;
+      setProfilePhoto(base64String);
+      localStorage.setItem("profile_photo", base64String);
+      
+      // Save to backend
+      await saveProfilePhotoToBackend(base64String);
+      
+      toast({
+        title: "Photo uploaded",
+        description: "Your profile photo has been updated successfully!",
+      });
+      setIsUploading(false);
+    };
+    
+    reader.onerror = () => {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive",
+      });
+      setIsUploading(false);
+    };
+
+    reader.readAsDataURL(file);
   };
 
-  // Mock alumni data
-  const alumniProfiles = [
-    {
-      name: 'Sarah Chen',
-      batch: '2018',
-      company: 'Google',
-      position: 'Senior Software Engineer',
-      location: 'Mountain View, CA',
-      skills: ['React', 'Node.js', 'Python', 'Machine Learning'],
-      linkedinUrl: '#',
-    },
-    {
-      name: 'Michael Rodriguez',
-      batch: '2016',
-      company: 'Microsoft',
-      position: 'Product Manager',
-      location: 'Seattle, WA',
-      skills: ['Product Strategy', 'Agile', 'Data Analysis'],
-      linkedinUrl: '#',
-    },
-    {
-      name: 'Emily Davis',
-      batch: '2019',
-      company: 'Stripe',
-      position: 'Engineering Manager',
-      location: 'San Francisco, CA',
-      skills: ['Leadership', 'Full Stack', 'Fintech'],
-      linkedinUrl: '#',
-    },
-    {
-      name: 'David Kim',
-      batch: '2017',
-      company: 'Tesla',
-      position: 'Data Scientist',
-      location: 'Austin, TX',
-      skills: ['Python', 'TensorFlow', 'Statistics', 'Automotive'],
-      linkedinUrl: '#',
-    },
-  ];
+  const saveProfilePhotoToBackend = async (photoData: string) => {
+    try {
+      const userId = localStorage.getItem('user_id');
+      const token = localStorage.getItem('access_token');
+      
+      if (!userId || !token) return;
 
-  const upcomingEvents = [
-    {
-      title: 'Tech Career Fair',
-      date: 'Dec 15, 2024',
-      location: 'Virtual',
-      attendees: 150,
-    },
-    {
-      title: 'Alumni Networking Mixer',
-      date: 'Dec 20, 2024',
-      location: 'San Francisco',
-      attendees: 85,
-    },
-    {
-      title: 'Startup Pitch Night',
-      date: 'Jan 5, 2025',
-      location: 'Palo Alto',
-      attendees: 120,
-    },
-  ];
+      await fetch(`http://127.0.0.1:8000/api/profile/${userId}/`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profile_photo: photoData
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save photo to backend:', error);
+    }
+  };
 
-  const mentorshipRequests = [
-    {
-      mentor: 'Sarah Chen',
-      status: 'Pending',
-      topic: 'Software Engineering Career Path',
-      date: 'Dec 10, 2024',
-    },
-    {
-      mentor: 'Michael Rodriguez',
-      status: 'Accepted',
-      topic: 'Product Management Transition',
-      date: 'Dec 8, 2024',
-    },
-  ];
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
 
-  const initials = studentProfile.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const removePhoto = () => {
+    setProfilePhoto(null);
+    localStorage.removeItem("profile_photo");
+    toast({
+      title: "Photo removed",
+      description: "Your profile photo has been removed.",
+    });
+  };
+
+  const handleLogout = () => {
+    // Only clear session data, not permanent profile data
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_data");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("user_name");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("student_name");
+    localStorage.removeItem("alumni_name");
+    
+    // Clear session-based profile data (will be reloaded on next login)
+    localStorage.removeItem("user_phone");
+    localStorage.removeItem("user_location");
+    localStorage.removeItem("user_bio");
+    localStorage.removeItem("user_university");
+    localStorage.removeItem("user_major");
+    localStorage.removeItem("user_graduation_year");
+    localStorage.removeItem("profile_photo");
+
+    toast({
+      title: "Logged out successfully",
+      description: "See you next time!",
+    });
+
+    // Redirect to login page
+    navigate("/login");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-gradient-primary text-white p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <Button asChild variant="ghost" className="text-white hover:bg-white/10">
-              <Link to="/" className="flex items-center space-x-2">
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Home</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" className="text-white hover:bg-white/10">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20 border-4 border-white/20">
-              <AvatarImage src={studentProfile.avatar} alt={studentProfile.name} />
-              <AvatarFallback className="bg-white/20 text-white text-xl font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div>
-              <h1 className="text-3xl font-bold">{studentProfile.name}</h1>
-              <p className="text-white/80">{studentProfile.course} • Batch of {studentProfile.batch}</p>
-              <div className="flex items-center space-x-4 mt-2 text-sm text-white/70">
-                <div className="flex items-center">
-                  <GraduationCap className="w-4 h-4 mr-1" />
-                  <span>{studentProfile.university}</span>
-                </div>
-                <div className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span>{studentProfile.location}</span>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      {/* Modern Header with Profile */}
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left side - Logo and Title */}
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">S</span>
               </div>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {studentProfile.interests.map((interest, index) => (
-                  <Badge key={index} variant="secondary" className="bg-white/20 text-white border-white/30">
-                    {interest}
-                  </Badge>
-                ))}
-              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Student Portal
+              </h1>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Search Section */}
-            <Card className="card-elevated">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Search className="w-5 h-5" />
-                  <span>Find Alumni</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex space-x-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Search by name, company, or skills..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                  <Button className="btn-secondary">
-                    <Search className="w-4 h-4" />
-                  </Button>
+            {/* Right side - Profile Section */}
+            <div className="flex items-center space-x-6">
+              {/* Navigation Links */}
+              <nav className="hidden md:flex items-center space-x-1">
+                <Button asChild variant="ghost" className="hover:bg-blue-50 transition-colors">
+                  <Link to="/student/profile" className="flex items-center space-x-2">
+                    <User className="w-4 h-4" />
+                    <span>Profile</span>
+                  </Link>
+                </Button>
+                <Button asChild variant="ghost" className="hover:bg-blue-50 transition-colors">
+                  <Link to="/student/careers">Careers</Link>
+                </Button>
+                <Button asChild variant="ghost" className="hover:bg-blue-50 transition-colors">
+                  <Link to="/student/hackathons">Hackathons</Link>
+                </Button>
+                <Button asChild variant="ghost" className="hover:bg-blue-50 transition-colors">
+                  <Link to="/student/explore">Explore</Link>
+                </Button>
+              </nav>
+
+              {/* Profile Photo Section */}
+              <div className="flex items-center space-x-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-gray-900">{studentName}</p>
+                  <p className="text-xs text-gray-500">Student</p>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Select value={filterBatch} onValueChange={setFilterBatch}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Batch Year" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2023">2023</SelectItem>
-                      <SelectItem value="2022">2022</SelectItem>
-                      <SelectItem value="2021">2021</SelectItem>
-                      <SelectItem value="2020">2020</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Profile Photo */}
+                <div className="relative group">
+                  <div 
+                    className="w-12 h-12 rounded-full overflow-hidden border-3 border-white shadow-lg cursor-pointer transition-transform hover:scale-105"
+                    onClick={handlePhotoClick}
+                  >
+                    {profilePhoto ? (
+                      <img 
+                        src={profilePhoto} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                        <span className="text-white font-semibold text-sm">
+                          {getInitials(studentName)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   
-                  <Select value={filterCompany} onValueChange={setFilterCompany}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="google">Google</SelectItem>
-                      <SelectItem value="microsoft">Microsoft</SelectItem>
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="meta">Meta</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select value={filterLocation} onValueChange={setFilterLocation}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sf">San Francisco</SelectItem>
-                      <SelectItem value="ny">New York</SelectItem>
-                      <SelectItem value="seattle">Seattle</SelectItem>
-                      <SelectItem value="austin">Austin</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  {/* Camera Overlay */}
+                  <div className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    {isUploading ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4 text-white" />
+                    )}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Alumni Results */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">Alumni Network</h2>
-              <div className="grid grid-cols-1 gap-6">
-                {alumniProfiles.map((profile, index) => (
-                  <ProfileCard key={index} {...profile} />
-                ))}
+                {/* Settings and Logout Buttons */}
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-100 transition-colors">
+                    <Settings className="w-4 h-4 text-gray-600" />
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleLogout}
+                    variant="ghost" 
+                    size="sm" 
+                    className="p-2 hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors group"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Mentorship Requests */}
-            <Card className="card-elevated">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageCircle className="w-5 h-5" />
-                  <span>Mentorship</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {mentorshipRequests.map((request, index) => (
-                  <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">{request.mentor}</span>
-                      <Badge 
-                        variant={request.status === 'Accepted' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {request.status}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mb-2">{request.topic}</p>
-                    <p className="text-xs text-muted-foreground">{request.date}</p>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full text-sm">
-                  View All Requests
-                </Button>
-              </CardContent>
-            </Card>
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handlePhotoUpload}
+        className="hidden"
+      />
 
-            {/* Upcoming Events */}
-            <Card className="card-elevated">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>Upcoming Events</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {upcomingEvents.map((event, index) => (
-                  <div key={index} className="p-3 bg-muted/50 rounded-lg">
-                    <h4 className="font-medium text-sm">{event.title}</h4>
-                    <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                      <span>{event.date}</span>
-                      <span>{event.attendees} attending</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">{event.location}</p>
-                  </div>
-                ))}
-                <Button variant="outline" className="w-full text-sm">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  View All Events
+      {/* Welcome Section */}
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        <div className="bg-white/70 backdrop-blur-md rounded-3xl shadow-xl border border-white/20 p-8 mb-8">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="text-center md:text-left mb-6 md:mb-0">
+              <h2 className="text-4xl font-bold text-gray-800 mb-2">
+                Welcome back, {studentName}! 👋
+              </h2>
+              <p className="text-lg text-gray-600 mb-4">
+                Ready to explore new opportunities and advance your career?
+              </p>
+              
+              {/* Quick Actions */}
+              <div className="flex flex-wrap gap-3">
+                <Button asChild className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg">
+                  <Link to="/student/careers" className="flex items-center space-x-2">
+                    <span>Browse Jobs</span>
+                  </Link>
                 </Button>
-              </CardContent>
-            </Card>
+                <Button asChild variant="outline" className="border-2 hover:bg-gray-50">
+                  <Link to="/student/hackathons">Join Hackathons</Link>
+                </Button>
+              </div>
+            </div>
 
-            {/* Fundraising */}
-            <Card className="card-elevated">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <DollarSign className="w-5 h-5" />
-                  <span>Active Campaigns</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-3 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium text-sm">New Computer Lab</h4>
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>$45,000 raised</span>
-                      <span>75% of $60,000</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div className="bg-gradient-primary h-2 rounded-full" style={{ width: '75%' }}></div>
-                    </div>
+            {/* Large Profile Display */}
+            <div className="relative">
+              <div 
+                className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-2xl cursor-pointer transition-transform hover:scale-105"
+                onClick={handlePhotoClick}
+              >
+                {profilePhoto ? (
+                  <img 
+                    src={profilePhoto} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
+                    <span className="text-white font-bold text-3xl">
+                      {getInitials(studentName)}
+                    </span>
                   </div>
-                </div>
-                <div className="p-3 bg-muted/50 rounded-lg">
-                  <h4 className="font-medium text-sm">Scholarship Fund</h4>
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>$28,500 raised</span>
-                      <span>57% of $50,000</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div className="bg-gradient-secondary h-2 rounded-full" style={{ width: '57%' }}></div>
-                    </div>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full text-sm">
-                  <Heart className="w-4 h-4 mr-2" />
-                  Support a Campaign
-                </Button>
-              </CardContent>
-            </Card>
+                )}
+              </div>
+              
+              {/* Upload Button */}
+              <button
+                onClick={handlePhotoClick}
+                className="absolute bottom-2 right-2 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-colors flex items-center justify-center group"
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                )}
+              </button>
+
+              {/* Remove Photo Button (if photo exists) */}
+              {profilePhoto && (
+                <button
+                  onClick={removePhoto}
+                  className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-colors flex items-center justify-center text-xs"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Quick Stats or Additional Content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Link 
+            to="/student/profile" 
+            className="bg-white/60 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 text-center hover:shadow-xl transition-all hover:scale-105 cursor-pointer group"
+          >
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
+              <User className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">Profile Completion</h3>
+            <p className="text-gray-600 text-sm">Complete your profile to get better recommendations</p>
+          </Link>
+
+          <Link 
+            to="/student/careers" 
+            className="bg-white/60 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 text-center hover:shadow-xl transition-all hover:scale-105 cursor-pointer group"
+          >
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
+              <span className="text-2xl group-hover:scale-110 transition-transform">🎯</span>
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-green-600 transition-colors">Career Goals</h3>
+            <p className="text-gray-600 text-sm">Set and track your career objectives</p>
+          </Link>
+
+          <Link 
+            to="/student/hackathons" 
+            className="bg-white/60 backdrop-blur-md rounded-2xl shadow-lg border border-white/20 p-6 text-center hover:shadow-xl transition-all hover:scale-105 cursor-pointer group"
+          >
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+              <span className="text-2xl group-hover:scale-110 transition-transform">🚀</span>
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">Opportunities</h3>
+            <p className="text-gray-600 text-sm">Discover internships and job openings</p>
+          </Link>
+        </div>
+      </main>
     </div>
   );
 };
