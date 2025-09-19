@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { LogIn, User, Lock, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import alumglobeLogo from '@/assets/alumglobe-logo.png';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '' }); // <-- changed from username to email
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -23,7 +23,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/login/', {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -35,55 +35,40 @@ const Login = () => {
         throw new Error(data.detail || 'Login failed');
       }
 
-      // Store tokens
-      if (data.tokens) {
-        localStorage.setItem('access_token', data.tokens.access);
-        localStorage.setItem('refresh_token', data.tokens.refresh);
-      }
+      // ✅ Save JWT tokens
+      localStorage.setItem('access_token', data.tokens.access);
+      localStorage.setItem('refresh_token', data.tokens.refresh);
 
-      // Store user info (both as JSON and individual items for compatibility)
+      // ✅ Save user info
       const user = data.user || {};
       localStorage.setItem('user_data', JSON.stringify(user));
-      
-      // Store individual user details for easy access
       localStorage.setItem('user_id', user.id || '');
-      localStorage.setItem('user_name', user.username || user.first_name || user.name || 'User');
-      localStorage.setItem('user_email', user.email || '');
+      localStorage.setItem('user_name', user.username || 'User');
       localStorage.setItem('user_role', user.role || '');
-      
-      // Store additional name variations based on role
-      if (user.role === 'student') {
-        localStorage.setItem('student_name', user.username || user.first_name || user.name || 'Student');
-      } else if (user.role === 'alumni') {
-        localStorage.setItem('alumni_name', user.username || user.first_name || user.name || 'Alumni');
-      }
 
-      // Load user's saved profile data from backend/server
-      await loadUserProfileData(user.id);
-
-      // Success toast with actual name
-      const displayName = user.username || user.first_name || user.name || 'User';
+      // ✅ Success toast
       toast({
         title: 'Login Successful',
-        description: `Welcome back, ${displayName}!`,
+        description: `Welcome back, ${user.username || 'User'}!`,
       });
 
-      // Redirect based on user role
-      const userRole = user.role;
-      switch (userRole) {
-        case 'admin':
-          navigate('/admin-dashboard');
-          break;
+      // ✅ Redirect based on role
+      switch (user.role) {
         case 'student':
           navigate('/student-dashboard');
           break;
         case 'alumni':
           navigate('/alumni-dashboard');
           break;
+        case 'faculty':
+          navigate('/faculty-dashboard');
+          break;
+        case 'admin':
+          navigate('/admin-dashboard');
+          break;
         default:
-          navigate('/dashboard');
+          navigate('/dashboard'); // fallback
       }
-
     } catch (err: any) {
       console.error('Login error:', err);
       toast({
@@ -96,37 +81,10 @@ const Login = () => {
     }
   };
 
-  // Function to load user profile data after login
-  const loadUserProfileData = async (userId: string) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/api/profile/${userId}/`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const profileData = await response.json();
-        
-        // Store profile data in localStorage for this session
-        localStorage.setItem('user_phone', profileData.phone || '');
-        localStorage.setItem('user_location', profileData.location || '');
-        localStorage.setItem('user_bio', profileData.bio || '');
-        localStorage.setItem('user_university', profileData.university || '');
-        localStorage.setItem('user_major', profileData.major || '');
-        localStorage.setItem('user_graduation_year', profileData.graduation_year || '');
-        localStorage.setItem('profile_photo', profileData.profile_photo || '');
-      }
-    } catch (error) {
-      console.log('Profile data not found, will use defaults');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Back button */}
         <div className="mb-6">
           <Button asChild variant="ghost" className="text-white hover:bg-white/10">
             <Link to="/" className="flex items-center space-x-2">
@@ -136,6 +94,7 @@ const Login = () => {
           </Button>
         </div>
 
+        {/* Login card */}
         <Card className="card-elevated animate-fade-in">
           <CardHeader className="text-center space-y-4">
             <div className="flex justify-center">
@@ -147,10 +106,11 @@ const Login = () => {
 
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     name="email"
@@ -164,6 +124,7 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
@@ -181,6 +142,7 @@ const Login = () => {
                 </div>
               </div>
 
+              {/* Submit */}
               <Button type="submit" className="w-full btn-hero" disabled={isLoading}>
                 {isLoading ? (
                   <div className="flex items-center space-x-2">
@@ -196,6 +158,7 @@ const Login = () => {
               </Button>
             </form>
 
+            {/* Signup link */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}
