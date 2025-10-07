@@ -1,149 +1,134 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Search, Calendar, DollarSign, Shield, Zap, Globe, Target, TrendingUp, Briefcase, MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import heroBackground from '@/assets/hero-background.jpg';
-import alumglobeLogo from '@/assets/alumglobe-logo.png';
-import { motion } from 'framer-motion';
+import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  Users,
+  Search,
+  Calendar,
+  DollarSign,
+  Shield,
+  Zap,
+  Globe,
+  Target,
+  TrendingUp,
+  Briefcase,
+  MessageCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import heroBackground from "@/assets/hero-background.jpg";
+import alumglobeLogo from "@/assets/alumglobe-logo.png";
+import { motion } from "framer-motion";
 
 const Landing = () => {
   const features = [
-    { icon: Users, title: 'Verified Alumni Profiles', description: 'Comprehensive profiles with verified data to ensure authenticity and trust.' },
-    { icon: Search, title: 'Search & Connect', description: 'Advanced search filters to find alumni by industry, location, batch, and expertise.' },
-    { icon: Calendar, title: 'Events Hub', description: 'Centralized platform for alumni events, reunions, and networking opportunities.' },
-    { icon: DollarSign, title: 'Fundraising Transparency', description: 'Track donations, view impact reports, and support educational initiatives.' },
-    { icon: Shield, title: 'Safe and consent based chat', description: 'Connect with fellow alumni and students through our secure, consent-based chat system.' },
-    { icon: Zap, title: 'Jobs/Hackathons/Internships', description: 'Provided by alumni and verified by us.' },
-    { icon: DollarSign, title: 'Mentorship and Guidance', description: 'Guidance provided by alumni to students and freshers and other services.' },
-    { icon: Globe, title: 'Overall improvement of the college ecosystem', description: 'It boosts the overall growth of the college ecosystem.' },
+    { icon: Users, title: "Verified Alumni Profiles", description: "Comprehensive profiles with verified data to ensure authenticity and trust." },
+    { icon: Search, title: "Search & Connect", description: "Advanced filters to find alumni by industry, location, batch, and expertise." },
+    { icon: Calendar, title: "Events Hub", description: "A central space for reunions, webinars, and networking opportunities." },
+    { icon: DollarSign, title: "Fundraising Transparency", description: "Track donations, view impact, and support educational causes transparently." },
+    { icon: Shield, title: "Secure Chat", description: "Consent-based alumni-student conversations with privacy-first design." },
+    { icon: Zap, title: "Opportunities", description: "Hackathons, internships, and jobs — powered by alumni and verified by us." },
+    { icon: DollarSign, title: "Mentorship", description: "Alumni-led guidance for students and recent graduates." },
+    { icon: Globe, title: "Community Growth", description: "Strengthening college culture and global alumni presence." },
   ];
 
   const problems = [
-    { icon: Users, title: 'Alumni Data Decay', description: 'Contact and career information becomes outdated, making it difficult to stay connected.' },
-    { icon: Target, title: 'Missed Mentorship', description: 'Students struggle to find relevant mentors while alumni willing to help go unnoticed.' },
-    { icon: TrendingUp, title: 'Fragmented Networks', description: 'Alumni communities are scattered across platforms with no central hub.' },
-    { icon: Globe, title: 'Limited Global Reach', description: 'Alumni abroad often remain disconnected from their alma mater and peers.' },
-    { icon: Briefcase, title: 'Career Growth Gaps', description: 'Opportunities for jobs, internships, and referrals are lost without structured alumni support.' },
-    { icon: MessageCircle, title: 'Low Engagement', description: 'Events, updates, and opportunities often fail to reach the right alumni or students.' },
+    { icon: Users, title: "Data Decay", description: "Outdated alumni info causes disconnection and missed opportunities." },
+    { icon: Target, title: "Missed Mentorship", description: "Students can’t find the right mentors; alumni aren’t engaged." },
+    { icon: TrendingUp, title: "Fragmented Networks", description: "Communities scattered across different platforms." },
+    { icon: Globe, title: "Limited Global Reach", description: "International alumni lose touch with their alma mater." },
+    { icon: Briefcase, title: "Career Gaps", description: "Lost job and internship referrals due to weak connections." },
+    { icon: MessageCircle, title: "Low Engagement", description: "Important updates and events fail to reach the right people." },
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20 selection:text-primary">
       <Navbar />
 
-      {/* Hero Section */}
+      {/* ===== HERO SECTION ===== */}
       <section
-        className="relative pt-16 pb-20 overflow-hidden"
+        className="relative pt-16 pb-28 overflow-hidden text-center text-white"
         style={{
           backgroundImage: `url(${heroBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundSize: "cover",
+          backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-background/60 to-yellow-600/60 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-radial from-white/10 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/70 via-background/70 to-secondary/70 mix-blend-multiply gradient-animated" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center py-28">
-            <motion.div
-              className="animate-fade-in"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <motion.img
-                src={alumglobeLogo}
-                alt="AlumGlobe"
-                className="h-28 w-28 mx-auto mb-8 rounded-full object-cover shadow-lg ring-4 ring-white/20"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-              />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 flex flex-col items-center justify-center">
+          <motion.img
+            src={alumglobeLogo}
+            alt="AlumGlobe"
+            className="h-28 w-28 rounded-full shadow-lg ring-4 ring-white/20 mb-8"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.8 }}
+          />
+          <motion.h1
+            className="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-white via-yellow-100 to-yellow-400 bg-clip-text text-transparent drop-shadow-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            AlumGlobe
+          </motion.h1>
 
-              <h1 className="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-white via-white/90 to-yellow-300 bg-clip-text text-transparent drop-shadow-md">
-                AlumGlobe
-              </h1>
+          <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-10">
+            Connect. Inspire. Grow. — Empowering alumni and students through a single global platform.
+          </p>
 
-              <p className="text-xl md:text-2xl font-semibold text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Connecting Alumni, Inspiring Students, and Building Lifelong Opportunities
-              </p>
-
-              <p className="text-lg font-semibold text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed">
-                AlumGlobe brings graduates and students together to share knowledge, mentorship, career guidance,
-                and unforgettable experiences, creating a thriving network that empowers everyone.
-              </p>
-
-              <motion.div
-                className="flex flex-col sm:flex-row gap-4 justify-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-              >
-                <Button
-                  asChild
-                  className="text-lg px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300 bg-white text-primary font-semibold rounded-lg flex items-center space-x-2 hover:bg-white/90"
-                >
-                  <Link to="/signup">
-                    <span>Get Started</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </Button>
-
-                <Button
-                  asChild
-                  className="text-lg px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300 bg-white text-primary font-semibold rounded-lg flex items-center space-x-2 hover:bg-white/90"
-                >
-                  <Link to="/login">
-                    <span>Login</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </Button>
-              </motion.div>
-            </motion.div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild className="bg-white text-primary font-semibold px-8 py-4 rounded-lg shadow-lg hover:bg-white/90 transition-all duration-300">
+              <Link to="/signup">
+                <span>Get Started</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+            <Button asChild className="bg-transparent border-2 border-white text-white font-semibold px-8 py-4 rounded-lg hover:bg-white/20 transition-all duration-300">
+              <Link to="/login">
+                <span>Login</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Problem Section */}
-      <section className="py-24 bg-gradient-to-b from-muted/40 to-background" id="problems">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="text-center mb-20"
-            initial={{ opacity: 0, y: 30 }}
+      {/* ===== PROBLEMS SECTION ===== */}
+      <section className="py-24 bg-gradient-to-b from-muted/50 to-background">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold mb-4"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6 tracking-tight">
-              The Alumni Engagement Challenge
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Traditional alumni networks face significant challenges that limit their effectiveness and impact.
-            </p>
-          </motion.div>
+            The Alumni Engagement Challenge
+          </motion.h2>
+          <p className="text-muted-foreground max-w-3xl mx-auto mb-16">
+            Alumni connections often fade — we’re here to change that.
+          </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {problems.map((problem, index) => (
+            {problems.map((item, i) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9, y: 50 }}
+                key={i}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.05 }}
               >
-                <Card className="relative overflow-hidden backdrop-blur-lg bg-background/60 border border-border/50 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 group">
-                  <CardHeader className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-destructive/20 to-destructive/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:from-destructive/30 group-hover:to-destructive/20 transition-all duration-300">
-                      <problem.icon className="w-8 h-8 text-destructive" />
+                <Card className="glass-smooth hover-lift rounded-2xl p-6">
+                  <div className="flex flex-col items-center">
+                    <div className="p-4 rounded-full bg-destructive/10 mb-4 icon-glow">
+                      <item.icon className="w-8 h-8 text-destructive" />
                     </div>
-                    <CardTitle className="text-xl font-semibold">{problem.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground text-center leading-relaxed">{problem.description}</p>
-                  </CardContent>
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-destructive/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <CardTitle>{item.title}</CardTitle>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mt-2">{item.description}</p>
+                    </CardContent>
+                  </div>
                 </Card>
               </motion.div>
             ))}
@@ -151,84 +136,60 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-gradient-to-b from-muted/40 to-background" id="features">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            className="text-center mb-20"
-            initial={{ opacity: 0, y: 30 }}
+      {/* ===== FEATURES SECTION ===== */}
+      <section className="py-24 bg-gradient-to-b from-background to-muted/40">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <motion.h2
+            className="text-4xl md:text-5xl font-bold mb-4"
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6 tracking-tight">
-              Powerful Features
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Everything you need to build and maintain strong alumni relationships.
-            </p>
-          </motion.div>
+            Powerful Features
+          </motion.h2>
+          <p className="text-muted-foreground max-w-3xl mx-auto mb-16">
+            Everything you need to build and maintain lasting alumni relationships.
+          </p>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
-          >
-            {features.map((feature, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, i) => (
               <motion.div
-                key={index}
-                variants={{ hidden: { opacity: 0, y: 40, scale: 0.95 }, visible: { opacity: 1, y: 0, scale: 1 } }}
-                transition={{ duration: 0.6 }}
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.05 }}
               >
-                <Card className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br from-background/60 to-muted/30 backdrop-blur-md shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-                  <CardHeader className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-primary/60 flex items-center justify-center mx-auto mb-6 relative group-hover:scale-110 transition-transform duration-300">
-                      <feature.icon className="w-8 h-8 text-white drop-shadow-lg" />
-                    </div>
-                    <CardTitle className="text-xl font-semibold">{feature.title}</CardTitle>
-                  </CardHeader>
+                <Card className="glass-smooth hover-lift rounded-2xl p-6 text-center">
+                  <div className="p-4 rounded-full bg-primary/20 mb-4 icon-glow inline-flex items-center justify-center">
+                    <feature.icon className="w-8 h-8 text-primary" />
+                  </div>
+                  <CardTitle>{feature.title}</CardTitle>
                   <CardContent>
-                    <p className="text-muted-foreground text-center leading-relaxed">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{feature.description}</p>
                   </CardContent>
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </Card>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary via-primary/90 to-yellow-600 text-white relative overflow-hidden" id="contact">
+      {/* ===== CTA SECTION ===== */}
+      <section className="py-20 bg-gradient-to-r from-primary to-secondary text-white text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-radial from-white/10 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <motion.div className="animate-fade-in" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}>
-            <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Ready to Transform Your Alumni Network?</h2>
-            <p className="text-lg md:text-xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              Join thousands of alumni already connecting, mentoring, and growing together on AlumGlobe.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              {[
-                { label: 'Start Your Journey', to: '/signup' },
-                { label: 'Login Now', to: '/login' },
-              ].map((btn, i) => (
-                <motion.div key={i} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                  <Button
-                    asChild
-                    className="px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-white to-gray-100 text-primary shadow-lg hover:shadow-2xl hover:from-gray-100 hover:to-white transition-all duration-300 flex items-center gap-2"
-                  >
-                    <Link to={btn.to}>
-                      <span>{btn.label}</span>
-                      <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </Button>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+        <div className="relative z-10 max-w-5xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-extrabold mb-6">Ready to Transform Your Network?</h2>
+          <p className="text-lg text-white/90 mb-10">
+            Join thousands of alumni already connecting, mentoring, and growing together on AlumGlobe.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Button asChild className="bg-white text-primary px-8 py-4 rounded-xl shadow-lg hover:bg-white/90 transition-all duration-300">
+              <Link to="/signup">Start Your Journey</Link>
+            </Button>
+            <Button asChild className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl hover:bg-white/10 transition-all duration-300">
+              <Link to="/login">Login Now</Link>
+            </Button>
+          </div>
         </div>
       </section>
 

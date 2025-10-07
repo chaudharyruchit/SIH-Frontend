@@ -1,9 +1,9 @@
 // src/api/api.ts
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8000/api'; // Change to your backend URL
+// Load API base URL from environment variable
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-// Generic Axios instance
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -23,7 +23,6 @@ export const registerUser = async (userData: {
   rollNo?: string;
 }) => {
   try {
-    // Backend expects different fields based on role
     const payload: any = {
       email: userData.email,
       password: userData.password,
@@ -31,17 +30,17 @@ export const registerUser = async (userData: {
     };
 
     if (userData.role === 'admin') {
-      payload.college = userData.college; // admin only needs college
+      payload.college = userData.college;
     } else {
-      // student or alumni
       payload.fullName = userData.fullName;
       payload.college = userData.college;
       payload.rollNo = userData.rollNo;
     }
 
     const response = await api.post('/register/', payload);
-    return response.data; // typically contains success message or token
+    return response.data;
   } catch (error: any) {
+    console.error('Registration Error:', error);
     throw error.response?.data || { detail: 'Server error' };
   }
 };
@@ -55,14 +54,15 @@ export const loginUser = async (loginData: {
 }) => {
   try {
     const response = await api.post('/login/', loginData);
-    return response.data; // typically contains auth token and user info
+    return response.data;
   } catch (error: any) {
+    console.error('Login Error:', error);
     throw error.response?.data || { detail: 'Invalid credentials' };
   }
 };
 
 // -------------------
-// OPTIONAL: GET USER INFO
+// GET USER PROFILE
 // -------------------
 export const getUserProfile = async (token: string) => {
   try {
@@ -71,6 +71,7 @@ export const getUserProfile = async (token: string) => {
     });
     return response.data;
   } catch (error: any) {
+    console.error('Profile Fetch Error:', error);
     throw error.response?.data || { detail: 'Cannot fetch profile' };
   }
 };
