@@ -1,8 +1,9 @@
 // src/api/api.ts
 import axios from 'axios';
-
+console.log("Backend URL (from env):", import.meta.env.VITE_API_URL);
 // Load API base URL from environment variable
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
 
 const api = axios.create({
   baseURL: BASE_URL,
